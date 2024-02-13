@@ -14,7 +14,7 @@ class SpecializationViewset(viewsets.ModelViewSet):
 
 class AvailabletimeViewset(viewsets.ModelViewSet):
     queryset = models.AvailableTime.objects.all()
-    serializer_class = serializers.ava
+    serializer_class = serializers.AvailableTimeSerializer
 
 class DesignationViewset(viewsets.ModelViewSet):
     queryset = models.Designation.objects.all()
