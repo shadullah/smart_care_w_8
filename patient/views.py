@@ -8,6 +8,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate,login,logout
+from rest_framework.authtoken.models import Token
 
 # for sending email
 from django.core.mail import EmailMultiAlternatives
@@ -53,3 +55,25 @@ def activate(req, uid64, token):
         return redirect('register')
     else:
         return redirect('register')
+    
+class UserLoginAPIView(APIView):
+    def post(self,req):
+        serializer = serializers.UserLoginSerializers(data=self.request.data)
+        if serializer.is_valid():
+            username= serializer.validated_data['username']
+            password= serializer.validated_data['password']
+
+            user = authenticate(username=username, password=password)
+            login(req, user)
+            if user:
+                token, _ =Token.objects.get_or_create(user=user)
+                return Response({'token': token.key, 'user_id': user.id})
+            else:
+                return Response({'error': "Invalid Credential"})
+        return Response(serializer.errors)
+    
+class UserLogoutView(APIView):
+    def get(self, req):
+        req.user.auth_token.delete()
+        logout(req)
+        return redirect('login')
